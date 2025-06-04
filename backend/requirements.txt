@@ -1,0 +1,5 @@
+fastapi
+uvicorn
+jsbeautifier
+google-generativeai
+python-dotenv
