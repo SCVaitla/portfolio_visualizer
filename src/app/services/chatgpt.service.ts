@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
 
 @Injectable({
   providedIn: 'root'
@@ -7,13 +8,13 @@ import { BehaviorSubject } from 'rxjs';
 export class ChatgptService {
   public generatedHtml$ = new BehaviorSubject<string>('');
 
-  generatePortfolioCode(resumeText: string): void {
-    console.log('Mock HTML being returned for:', resumeText.slice(0, 100));
+  constructor(private http: HttpClient) { }
 
-    const mockHtml = `<section>
-  <h1>${resumeText.split('\n')[0]}</h1>
-  <p>This is a mock portfolio section generated from your resume.</p>
-</section>`;
-    this.generatedHtml$.next(mockHtml);
+  generatePortfolioCode(resumeText: string): void {
+    const formData = new FormData();
+    formData.append('file', new Blob([resumeText], { type: 'text/plain' }), 'resume.txt');
+
+    this.http.post<{ html_code: string }>('http://localhost:8000/generate', formData)
+      .subscribe(res => this.generatedHtml$.next(res.html_code));
   }
 }
