@@ -1,0 +1,93 @@
+<div class="upload-section">
+  <h2 class="section-title">Upload Your Resume</h2>
+
+  <!-- Error Message -->
+  <div *ngIf="fileError" class="error-message">
+    <div class="error-icon">⚠️</div>
+    <span>{{ fileError }}</span>
+    <button class="dismiss-error" (click)="fileError = ''">×</button>
+  </div>
+
+  <!-- File Upload Area -->
+  <div class="file-upload-area" [class.dragover]="isDragOver" [class.processing]="isProcessingFile"
+    (dragover)="onDragOver($event)" (dragleave)="onDragLeave($event)" (drop)="onDrop($event)">
+
+    <!-- Processing State -->
+    <div *ngIf="isProcessingFile" class="processing-state">
+      <div class="processing-spinner"></div>
+      <h3>Processing your file...</h3>
+      <p>Extracting text from {{ selectedFile?.name }}</p>
+    </div>
+
+    <!-- Upload Icon -->
+    <div *ngIf="!selectedFile && !isProcessingFile" class="upload-icon">📄</div>
+
+    <!-- No File Selected State -->
+    <div *ngIf="!selectedFile && !isProcessingFile; else fileSelectedTemplate">
+      <h3>Drag & drop your resume here</h3>
+      <p>or click to browse files</p>
+      <label for="resumeInput" class="file-label">
+        Choose File
+      </label>
+      <input type="file" accept=".txt,.pdf,.docx" id="resumeInput" class="file-input"
+        (change)="onFileSelected($event)" />
+      <p class="file-types">Supports PDF, DOCX, and TXT files (max 10MB)</p>
+    </div>
+
+    <!-- File Selected Template -->
+    <ng-template #fileSelectedTemplate>
+      <div *ngIf="selectedFile && !isProcessingFile" class="file-info">
+        <div class="file-details">
+          <div class="file-icon">✓</div>
+          <div class="file-text">
+            <h3>File Selected</h3>
+            <p class="file-name">{{ selectedFile.name }}</p>
+            <p class="file-size">{{ formatFileSize(selectedFile.size) }}</p>
+          </div>
+        </div>
+        <button class="change-file-btn" (click)="clearFile()" type="button">
+          Change File
+        </button>
+      </div>
+    </ng-template>
+  </div>
+
+  <!-- Resume Preview -->
+  <div *ngIf="resumeText && !isProcessingFile" class="resume-preview">
+    <div class="preview-header">
+      <span class="preview-label">Resume Content Preview</span>
+      <span class="character-count">{{ resumeText.length }} characters</span>
+    </div>
+    <textarea [value]="resumeText" readonly rows="12" placeholder="Your resume content will appear here..."
+      class="preview-textarea">
+    </textarea>
+  </div>
+
+  <!-- Generate Button -->
+  <button class="generate-btn" (click)="generatePortfolio()" [disabled]="!canGenerate" [class.loading]="isGenerating"
+    type="button">
+
+    <!-- Loading State -->
+    <ng-container *ngIf="isGenerating">
+      <div class="spinner"></div>
+      <span>Generating Portfolio...</span>
+    </ng-container>
+
+    <!-- Normal State -->
+    <ng-container *ngIf="!isGenerating">
+      <span class="btn-icon">✨</span>
+      <span>Generate Portfolio</span>
+    </ng-container>
+  </button>
+
+  <!-- Help Text -->
+  <div class="help-text" *ngIf="!selectedFile && !isProcessingFile">
+    <h4>💡 Tips for best results:</h4>
+    <ul>
+      <li>Use a well-formatted resume with clear sections</li>
+      <li>Include your contact information, skills, and experience</li>
+      <li>PDF and DOCX files generally work better than plain text</li>
+      <li>Make sure your resume is recent and up-to-date</li>
+    </ul>
+  </div>
+</div>
