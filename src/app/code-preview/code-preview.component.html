@@ -1,4 +1,18 @@
-<div *ngIf="generatedHtml" class="code-preview">
-  <h2>Generated HTML Code</h2>
-  <pre><code>{{ generatedHtml }}</code></pre>
+<div *ngIf="generatedHtml">
+  <div class="code-preview">
+    <div class="code-header">
+      <h2>Generated HTML Code</h2>
+      <div class="code-actions">
+        <button (click)="copyCode()" class="action-btn">📋 Copy</button>
+        <button (click)="downloadCode()" class="action-btn">💾 Download</button>
+        <button (click)="previewCode()" class="action-btn">👁️ Preview</button>
+      </div>
+    </div>
+    <pre><code>{{ generatedHtml }}</code></pre>
+  </div>
+
+  <!-- Copy success message -->
+  <div *ngIf="copySuccess" class="copy-success">
+    ✓ Code copied to clipboard!
+  </div>
 </div>

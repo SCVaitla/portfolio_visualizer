@@ -3,8 +3,7 @@ import { CommonModule } from '@angular/common';
 import * as pdfjsLib from 'pdfjs-dist';
 import * as mammoth from 'mammoth';
 import { ChatgptService } from '../services/chatgpt.service';
-
-// Required for PDF extraction
+import { ChangeDetectorRef } from '@angular/core';
 (pdfjsLib as any).GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.js`;
 
 @Component({
@@ -21,8 +20,9 @@ export class UploadResumeComponent {
   isGenerating = false;
   isProcessingFile = false;
   fileError = '';
+  showFullScreenLoader = false;
 
-  constructor(private chatService: ChatgptService) { }
+  constructor(private chatService: ChatgptService, private cd: ChangeDetectorRef) { }
 
   async onFileSelected(event: any): Promise<void> {
     const file: File = event.target.files[0];
@@ -55,17 +55,14 @@ export class UploadResumeComponent {
   }
 
   async processFile(file: File): Promise<void> {
-    // Reset previous state
     this.fileError = '';
     this.resumeText = '';
 
-    // Validate file
     if (!this.isValidFile(file)) {
       this.fileError = 'Unsupported file type. Please upload .txt, .pdf, or .docx files.';
       return;
     }
 
-    // Validate file size (max 10MB)
     if (file.size > 10 * 1024 * 1024) {
       this.fileError = 'File size too large. Please upload files smaller than 10MB.';
       return;
@@ -111,7 +108,6 @@ export class UploadResumeComponent {
       reader.onload = (e: any) => {
         try {
           this.resumeText = e.target.result;
-          console.log('Extracted TXT:', this.resumeText.slice(0, 100));
           resolve();
         } catch (error) {
           reject(error);
@@ -134,17 +130,13 @@ export class UploadResumeComponent {
           for (let i = 1; i <= pdf.numPages; i++) {
             const page = await pdf.getPage(i);
             const content = await page.getTextContent();
-            const pageText = content.items
-              .map((item: any) => item.str)
-              .join(' ');
+            const pageText = content.items.map((item: any) => item.str).join(' ');
             text += pageText + '\n';
           }
 
           this.resumeText = text.trim();
-          console.log('Extracted PDF:', this.resumeText.slice(0, 100));
           resolve();
         } catch (error) {
-          console.error('PDF extraction error:', error);
           reject(new Error('Failed to extract text from PDF'));
         }
       };
@@ -162,10 +154,8 @@ export class UploadResumeComponent {
             arrayBuffer: reader.result as ArrayBuffer
           });
           this.resumeText = result.value.trim();
-          console.log('Extracted DOCX:', this.resumeText.slice(0, 100));
           resolve();
         } catch (error) {
-          console.error('DOCX extraction error:', error);
           reject(new Error('Failed to extract text from DOCX'));
         }
       };
@@ -180,7 +170,6 @@ export class UploadResumeComponent {
     this.fileError = '';
     this.isProcessingFile = false;
 
-    // Clear the file input
     const fileInput = document.getElementById('resumeInput') as HTMLInputElement;
     if (fileInput) {
       fileInput.value = '';
@@ -201,26 +190,29 @@ export class UploadResumeComponent {
       return;
     }
 
-    console.log('Triggering generatePortfolio with text:', this.resumeText.slice(0, 100));
     this.isGenerating = true;
+    this.showFullScreenLoader = true;
     this.fileError = '';
 
+    console.log('📤 Triggering fullscreen loader');
+
     try {
-      console.log('Generating portfolio for:', this.resumeText.slice(0, 100));
-      await this.chatService.generatePortfolioCode(this.resumeText);
-
-      // You might want to handle success here, maybe emit an event or navigate
-      console.log('Portfolio generation completed successfully');
-
+      const response = await this.chatService.generatePortfolioCode(this.resumeText);
+      console.log('✅ Portfolio generated!', response); // log the response here
     } catch (error) {
-      console.error('Error generating portfolio:', error);
+      console.error('❌ Error generating portfolio:', error);
       this.fileError = 'Failed to generate portfolio. Please try again.';
     } finally {
-      this.isGenerating = false;
+      setTimeout(() => {
+        this.isGenerating = false;
+        this.showFullScreenLoader = false;
+        console.log('⛔ Loader hidden');
+      }, 500); // small delay to visually show the loader for at least a moment
     }
   }
 
-  // Getter for template convenience
+
+
   get hasValidResume(): boolean {
     return this.resumeText.trim().length > 0;
   }

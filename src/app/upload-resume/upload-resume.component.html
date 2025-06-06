@@ -1,6 +1,15 @@
 <div class="upload-section">
   <h2 class="section-title">Upload Your Resume</h2>
 
+  <!-- Fullscreen Loading Spinner -->
+  <div *ngIf="showFullScreenLoader" class="fullscreen-loader">
+    <div class="loader-content">
+      <div class="spinner-large"></div>
+      <h2>Generating your portfolio...</h2>
+      <p>This may take a moment.</p>
+    </div>
+  </div>
+
   <!-- Error Message -->
   <div *ngIf="fileError" class="error-message">
     <div class="error-icon">⚠️</div>
@@ -64,16 +73,11 @@
   </div>
 
   <!-- Generate Button -->
-  <button class="generate-btn" (click)="generatePortfolio()" [disabled]="!canGenerate" [class.loading]="isGenerating"
-    type="button">
-
-    <!-- Loading State -->
+  <button class="generate-btn" (click)="generatePortfolio()" [disabled]="!canGenerate" type="button">
     <ng-container *ngIf="isGenerating">
       <div class="spinner"></div>
       <span>Generating Portfolio...</span>
     </ng-container>
-
-    <!-- Normal State -->
     <ng-container *ngIf="!isGenerating">
       <span class="btn-icon">✨</span>
       <span>Generate Portfolio</span>

@@ -10,11 +10,21 @@ export class ChatgptService {
 
   constructor(private http: HttpClient) { }
 
-  generatePortfolioCode(resumeText: string): void {
+  generatePortfolioCode(resumeText: string): Promise<string> {
     const formData = new FormData();
     formData.append('file', new Blob([resumeText], { type: 'text/plain' }), 'resume.txt');
 
-    this.http.post<{ html_code: string }>('http://localhost:8000/generate', formData)
-      .subscribe(res => this.generatedHtml$.next(res.html_code));
+    return this.http.post<{ html_code?: string }>('http://localhost:8000/generate', formData)
+      .toPromise()
+      .then(res => {
+        const htmlCode = res?.html_code ?? '';
+        this.generatedHtml$.next(htmlCode);
+        return htmlCode;
+      })
+      .catch(err => {
+        console.error('❌ Error in generatePortfolioCode:', err);
+        throw err;
+      });
   }
+
 }

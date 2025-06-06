@@ -340,3 +340,44 @@ textarea {
 .file-upload-area.processing {
   animation: pulse 2s ease-in-out infinite;
 }
+
+.fullscreen-loader {
+  position: fixed;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.95);
+  z-index: 99999;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  backdrop-filter: blur(2px);
+
+  .loader-content {
+    text-align: center;
+  }
+
+  .spinner-large {
+    width: 60px;
+    height: 60px;
+    border: 6px solid #e2e8f0;
+    border-top: 6px solid #667eea;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 1rem auto;
+  }
+
+  h2 {
+    font-size: 1.5rem;
+    color: #2d3748;
+  }
+
+  p {
+    font-size: 1rem;
+    color: #4a5568;
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
